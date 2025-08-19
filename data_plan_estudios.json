@@ -7,8 +7,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "2",
@@ -17,8 +16,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "3",
@@ -27,8 +25,7 @@
       "regimen": "Cuatrimestral",
       "formato": "Taller",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "4",
@@ -37,8 +34,7 @@
       "regimen": "Cuatrimestral",
       "formato": "Taller",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "5",
@@ -47,8 +43,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "6",
@@ -57,8 +52,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "7",
@@ -67,8 +61,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "8",
@@ -77,8 +70,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "9",
@@ -87,8 +79,7 @@
       "regimen": "Anual",
       "formato": "Taller y Terreno",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "10",
@@ -99,8 +90,7 @@
       "requiere_cursada": [
         "1"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "11",
@@ -109,8 +99,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "12",
@@ -119,8 +108,7 @@
       "regimen": "Cuatrimestral",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "13",
@@ -131,18 +119,27 @@
       "requiere_cursada": [
         "1"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "14",
-      "nombre": "…",
+      "nombre": "Didáctica de las Ciencias naturales",
       "anio": 2,
-      "regimen": "…",
-      "formato": "…",
-      "requiere_cursada": [],
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "5",
+        "6",
+        "7"
+      ],
       "requiere_acreditar": [],
-      "requiere_acreditar_any": [["5", "6", "7"]]
+      "requiere_acreditar_any": [
+        [
+          "5",
+          "6",
+          "7"
+        ]
+      ]
     },
     {
       "codigo": "15",
@@ -154,8 +151,7 @@
         "5",
         "8"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "16",
@@ -166,8 +162,7 @@
       "requiere_cursada": [
         "6"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "17",
@@ -175,10 +170,20 @@
       "anio": 2,
       "regimen": "Cuatrimestral",
       "formato": "Taller",
-      "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "requiere_acreditar_any": [["8"], ["5","6"]]
-      "prerequisitos": []
+      "requiere_cursada": [
+        "8",
+        "5",
+        "6"
+      ],
+      "requiere_acreditar": [
+        "8"
+      ],
+      "requiere_acreditar_any": [
+        [
+          "5",
+          "6"
+        ]
+      ]
     },
     {
       "codigo": "18",
@@ -190,8 +195,7 @@
         "7",
         "8"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "19",
@@ -202,8 +206,7 @@
       "requiere_cursada": [
         "8"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "20",
@@ -213,11 +216,6 @@
       "formato": "Taller y Terreno",
       "requiere_cursada": [],
       "requiere_acreditar": [
-        "2",
-        "5",
-        "9"
-      ],
-      "prerequisitos": [
         "2",
         "5",
         "9"
@@ -232,8 +230,7 @@
       "requiere_cursada": [
         "13"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "22",
@@ -242,8 +239,7 @@
       "regimen": "Anual",
       "formato": "Asignatura",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "23",
@@ -255,8 +251,7 @@
         "3",
         "4"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "24",
@@ -269,8 +264,7 @@
         "14",
         "17"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "25",
@@ -282,8 +276,7 @@
         "15",
         "19"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "26",
@@ -295,8 +288,7 @@
         "15",
         "19"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "27",
@@ -308,8 +300,7 @@
         "15",
         "19"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "28",
@@ -321,8 +312,7 @@
         "15",
         "19"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "29",
@@ -333,8 +323,7 @@
       "requiere_cursada": [
         "19"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "30",
@@ -358,11 +347,6 @@
         "10",
         "14",
         "20"
-      ],
-      "prerequisitos": [
-        "10",
-        "14",
-        "20"
       ]
     },
     {
@@ -376,9 +360,6 @@
       ],
       "requiere_acreditar": [
         "30"
-      ],
-      "prerequisitos": [
-        "30"
       ]
     },
     {
@@ -390,8 +371,7 @@
       "requiere_cursada": [
         "2"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "33",
@@ -400,8 +380,7 @@
       "regimen": "Cuatrimestral",
       "formato": "Taller",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "34",
@@ -413,9 +392,6 @@
         "24"
       ],
       "requiere_acreditar": [
-        "30"
-      ],
-      "prerequisitos": [
         "30"
       ]
     },
@@ -431,8 +407,7 @@
         "25",
         "28"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "36",
@@ -445,8 +420,7 @@
         "26",
         "28"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "37",
@@ -459,8 +433,7 @@
         "25",
         "29"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "38",
@@ -473,8 +446,7 @@
         "27",
         "28"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "39",
@@ -487,8 +459,7 @@
         "28",
         "29"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "40",
@@ -500,8 +471,7 @@
         "14",
         "18"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "41",
@@ -510,8 +480,7 @@
       "regimen": "Cuatrimestral",
       "formato": "Taller",
       "requiere_cursada": [],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     },
     {
       "codigo": "42",
@@ -540,14 +509,10 @@
         "18",
         "19",
         "20",
+        "26",
         "28"
       ],
       "requiere_acreditar": [
-        "23",
-        "24",
-        "30"
-      ],
-      "prerequisitos": [
         "23",
         "24",
         "30"
@@ -581,54 +546,98 @@
         "19",
         "20"
       ],
-      "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar": []
     }
   ],
   "relaciones": [
     {
-      "from": "2",
-      "to": "20"
+      "from": "5",
+      "to": "14",
+      "type": "OR"
+    },
+    {
+      "from": "6",
+      "to": "14",
+      "type": "OR"
+    },
+    {
+      "from": "7",
+      "to": "14",
+      "type": "OR"
+    },
+    {
+      "from": "8",
+      "to": "17",
+      "type": "AND"
     },
     {
       "from": "5",
-      "to": "20"
+      "to": "17",
+      "type": "OR"
+    },
+    {
+      "from": "6",
+      "to": "17",
+      "type": "OR"
+    },
+    {
+      "from": "2",
+      "to": "20",
+      "type": "AND"
+    },
+    {
+      "from": "5",
+      "to": "20",
+      "type": "AND"
     },
     {
       "from": "9",
-      "to": "20"
+      "to": "20",
+      "type": "AND"
     },
     {
       "from": "10",
-      "to": "30"
+      "to": "30",
+      "type": "AND"
     },
     {
       "from": "14",
-      "to": "30"
+      "to": "30",
+      "type": "AND"
     },
     {
       "from": "20",
-      "to": "30"
+      "to": "30",
+      "type": "AND"
     },
     {
       "from": "30",
-      "to": "31"
+      "to": "31",
+      "type": "AND"
     },
     {
       "from": "30",
-      "to": "34"
+      "to": "34",
+      "type": "AND"
     },
     {
       "from": "23",
-      "to": "42"
+      "to": "42",
+      "type": "AND"
     },
     {
       "from": "24",
-      "to": "42"
+      "to": "42",
+      "type": "AND"
     },
     {
       "from": "30",
-      "to": "42"
+      "to": "42",
+      "type": "AND"
     }
-  ]
+  ],
+  "meta": {
+    "source_csv": "/mnt/data/Base de DATOS - FISICA.csv",
+    "notes": "14: any(5,6,7); 17: 8 AND any(5,6)"
+  }
 }
