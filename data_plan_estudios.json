@@ -4,120 +4,232 @@
       "codigo": "1",
       "nombre": "Pedagogía",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "2",
       "nombre": "Educación y transformaciones sociales contemporáneas",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "3",
       "nombre": "Educación sexual integral",
       "anio": 1,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "4",
       "nombre": "Cultura digital y educación",
       "anio": 1,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "5",
       "nombre": "Introducción a la Física y elementos de astronomía",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "6",
       "nombre": "Química y la Act. experimental 1",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "7",
       "nombre": "Introducción a los sistemas biológicos",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "8",
       "nombre": "Matemática y Ciencias Naturales 1",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "9",
       "nombre": "Práctica Docente I",
       "anio": 1,
+      "regimen": "Anual",
+      "formato": "Taller y Terreno",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "10",
       "nombre": "Didáctica y curriculum",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "1"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "11",
       "nombre": "Psicología del aprendizaje",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "12",
       "nombre": "Análisis de las instituciones educativas",
       "anio": 2,
+      "regimen": "Cuatrimestral",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "13",
       "nombre": "Pensamiento político pedagógico latinoamericano",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "1"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "14",
       "nombre": "Didáctica de las Ciencias naturales",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "5",
+        "6",
+        "o",
+        "7"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "15",
       "nombre": "Fundamentos y Modelos de la Mecánica Clásica",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "5",
+        "y",
+        "8"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "16",
       "nombre": "Química y la Actividad experimental 2",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "6"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "17",
       "nombre": "Actividades Experimentales de CyT escolar",
       "anio": 2,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [
+        "8",
+        "y",
+        "5",
+        "o",
+        "6"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "18",
       "nombre": "Ciencias de la tierra",
       "anio": 2,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [
+        "7",
+        "y",
+        "8"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "19",
       "nombre": "Matemática y Cs Naturales 2",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "8"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "20",
       "nombre": "Práctica Docente II",
       "anio": 2,
+      "regimen": "Anual",
+      "formato": "Taller y Terreno",
+      "requiere_cursada": [],
+      "requiere_acreditar": [
+        "2",
+        "5",
+        "y",
+        "9"
+      ],
       "prerequisitos": [
         "2",
         "5",
@@ -129,60 +241,140 @@
       "codigo": "21",
       "nombre": "Política educativa argentina",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "13"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "22",
       "nombre": "Problemas filosóficos de la educación",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "23",
       "nombre": "Trayectorias educativas de jóvenes y adultos",
       "anio": 3,
+      "regimen": "Cuatrimestral",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "3",
+        "y",
+        "4"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "24",
       "nombre": "Didáctica de la Física",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Taller",
+      "requiere_cursada": [
+        "5",
+        "14",
+        "y",
+        "17"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "25",
       "nombre": "Astronomía",
       "anio": 3,
+      "regimen": "Cuatrimestral",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "y",
+        "19"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "26",
       "nombre": "Ondas y óptica",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "y",
+        "19"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "27",
       "nombre": "Termodinámica",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "y",
+        "19"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "28",
       "nombre": "Electromagnetismo",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "y",
+        "19"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "29",
       "nombre": "Matemática asociada a la Física",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "19"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "30",
       "nombre": "Práctica docente III",
       "anio": 3,
+      "regimen": "Anual",
+      "formato": "Taller y Terreno",
+      "requiere_cursada": [
+        "1",
+        "a",
+        "9",
+        "y",
+        "15"
+      ],
+      "requiere_acreditar": [
+        "10",
+        "14",
+        "y",
+        "20"
+      ],
       "prerequisitos": [
         "10",
         "14",
@@ -194,6 +386,14 @@
       "codigo": "31",
       "nombre": "Reflexión filosófico-política de la práctica docente",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "22"
+      ],
+      "requiere_acreditar": [
+        "30"
+      ],
       "prerequisitos": [
         "30"
       ]
@@ -202,18 +402,36 @@
       "codigo": "32",
       "nombre": "Derechos, interculturalidad y ciudadanía",
       "anio": 4,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [
+        "2"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "33",
       "nombre": "EOI",
       "anio": 4,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "34",
       "nombre": "Enseñanza de la Física y sus problemas",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Ateneo",
+      "requiere_cursada": [
+        "24"
+      ],
+      "requiere_acreditar": [
+        "30"
+      ],
       "prerequisitos": [
         "30"
       ]
@@ -222,48 +440,122 @@
       "codigo": "35",
       "nombre": "Historia y epistemología de la Física",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "17",
+        "18",
+        "25",
+        "y",
+        "28"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "36",
       "nombre": "Física Cuántica, Atómica y Nuclear",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "16",
+        "26",
+        "y",
+        "28"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "37",
       "nombre": "Relatividad, Astrofísica y Cosmología",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "25",
+        "y",
+        "29"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "38",
       "nombre": "Física, Tecnología y Ambiente",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Taller",
+      "requiere_cursada": [
+        "15",
+        "27",
+        "y",
+        "28"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "39",
       "nombre": "Mecánica Avanzada y Física Teórica",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Asignatura",
+      "requiere_cursada": [
+        "15",
+        "28",
+        "y",
+        "29"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "40",
       "nombre": "Problemáticas socioambientales",
       "anio": 4,
+      "regimen": "Cuatrimestral",
+      "formato": "Semestral",
+      "requiere_cursada": [
+        "14",
+        "y",
+        "18"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "41",
       "nombre": "EOI",
       "anio": 4,
+      "regimen": "Cuatrimestral",
+      "formato": "Taller",
+      "requiere_cursada": [],
+      "requiere_acreditar": [],
       "prerequisitos": []
     },
     {
       "codigo": "42",
       "nombre": "Práctica docente IV",
       "anio": 4,
+      "regimen": "Anual",
+      "formato": "Taller y Terreno",
+      "requiere_cursada": [
+        "1",
+        "a",
+        "20",
+        "26",
+        "y",
+        "28"
+      ],
+      "requiere_acreditar": [
+        "23",
+        "24",
+        "y",
+        "30"
+      ],
       "prerequisitos": [
         "23",
         "24",
@@ -275,6 +567,14 @@
       "codigo": "43",
       "nombre": "Unidad Curricular Optativa",
       "anio": null,
+      "regimen": "-",
+      "formato": "-",
+      "requiere_cursada": [
+        "1",
+        "a",
+        "20"
+      ],
+      "requiere_acreditar": [],
       "prerequisitos": []
     }
   ],
