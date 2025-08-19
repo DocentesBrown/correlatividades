@@ -8,8 +8,8 @@
   <script src="https://unpkg.com/fuse.js@7.0.0"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Safe area for iOS notch */
-    :root { env(safe-area-inset-top); env(safe-area-inset-bottom); }
+    /* Evita destellos al cambiar tamaños en móvil */
+    html, body { height: 100%; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -18,7 +18,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <div>
         <h1 class="text-xl md:text-2xl font-bold leading-tight">Plan de Estudios</h1>
-        <p class="text-xs md:text-sm text-gray-600">Buscá materias, marcá aprobadas y visualizá correlativas.</p>
+        <p class="text-xs md:text-sm text-gray-600">Buscá materias, marcá Cursada/Aprobada y visualizá correlativas.</p>
       </div>
       <button id="scrollToListBtn" class="inline-flex items-center justify-center text-sm md:text-base border px-3 md:px-4 py-2 rounded-xl hover:bg-gray-50 active:opacity-80 min-h-[44px]">
         Materias
@@ -54,7 +54,6 @@
 
     <!-- Controls + List -->
     <section class="lg:col-span-1 order-2" id="listSection">
-      <!-- Controls in a collapsible details for mobile -->
       <details class="bg-white rounded-2xl shadow open:md:open" open>
         <summary class="cursor-pointer list-none px-4 py-3 md:px-5 md:py-4 border-b flex items-center justify-between">
           <span class="font-semibold">Controles</span>
@@ -95,11 +94,10 @@
             <button id="exportPngBtnMobile" class="flex-1 border px-3 py-3 rounded-xl hover:bg-gray-50 min-h-[44px]">PNG</button>
           </div>
 
-          <p class="text-xs text-gray-500">Tip: tocá nodos del grafo o el check de “aprobada” para recalcular habilitadas. Se guarda en este dispositivo.</p>
+          <p class="text-xs text-gray-500">Tip: tocá nodos del grafo o los checks de “Cursada/Aprobada” para recalcular habilitadas. Se guarda en este dispositivo.</p>
         </div>
       </details>
 
-      <!-- Course list -->
       <div class="bg-white rounded-2xl shadow mt-4">
         <div class="px-4 py-3 border-b flex items-center justify-between">
           <h2 class="font-semibold">Materias</h2>
@@ -110,7 +108,7 @@
     </section>
   </main>
 
-  <!-- Sticky bottom action bar for very small screens -->
+  <!-- Sticky bottom action bar (móvil) -->
   <div class="fixed bottom-0 inset-x-0 md:hidden z-30 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
     <div class="bg-white border rounded-2xl shadow-lg flex items-center justify-between p-2">
       <button id="toTop" class="text-sm border px-3 py-2 rounded-xl min-h-[44px]">Arriba</button>
@@ -126,11 +124,13 @@
   </footer>
 
 <script>
+/* ------------------------- Datos ------------------------- */
 async function loadData() {
   const res = await fetch('data_plan_estudios.json');
   return await res.json();
 }
 
+/* ------------------------- Búsqueda ------------------------- */
 function buildFuseIndex(cursos) {
   return new Fuse(cursos, {
     includeScore: true,
@@ -140,12 +140,23 @@ function buildFuseIndex(cursos) {
   });
 }
 
-function computeStatus(curso, aprobadasSet) {
-  const prereqs = curso.prerequisitos || [];
+/* ------------------------- Estado ------------------------- */
+/*
+Reglas:
+- REQUIERE ACREDITAR -> todas deben estar en Aprobadas.
+- REQUIERE CURSADA   -> todas deben estar en Cursadas o Aprobadas.
+*/
+function computeStatus(curso, aprobadasSet, cursadasSet) {
+  const reqAcred = curso.requiere_acreditar || curso.prerequisitos || [];
+  const reqCurs  = curso.requiere_cursada || [];
+
   if (aprobadasSet.has(curso.codigo)) return 'aprobada';
-  if (!prereqs.length) return 'disponible';
-  const ok = prereqs.every(p => aprobadasSet.has(p));
-  return ok ? 'habilitada' : 'bloqueada';
+  if (!reqAcred.length && !reqCurs.length) return 'disponible';
+
+  const okAcred = reqAcred.every(p => aprobadasSet.has(p));
+  const okCurs  = reqCurs.every(p => cursadasSet.has(p) || aprobadasSet.has(p));
+
+  return (okAcred && okCurs) ? 'habilitada' : 'bloqueada';
 }
 
 function chipForStatus(status) {
@@ -160,28 +171,43 @@ function chipForStatus(status) {
 
 function colorForStatus(status) {
   const map = {
-    'aprobada': '#d1d5db',
-    'disponible': '#eab308',
-    'habilitada': '#22c55e',
-    'bloqueada': '#ef4444',
+    'aprobada': '#d1d5db',   // gray-300
+    'disponible': '#eab308', // yellow-500
+    'habilitada': '#22c55e', // green-500
+    'bloqueada': '#ef4444',  // red-500
   };
   return map[status] || '#9ca3af';
 }
 
-function makeCourseCard(curso, status, aprobadasSet) {
-  const prereq = (curso.prerequisitos || []).length ? curso.prerequisitos.join(', ') : '—';
+function listOrDash(arr) {
+  if (!arr || !arr.length) return '—';
+  return arr.join(', ');
+}
+
+/* ------------------------- UI Tarjeta ------------------------- */
+function makeCourseCard(curso, status, aprobadasSet, cursadasSet) {
+  const reqAcred = curso.requiere_acreditar || [];
+  const reqCurs  = curso.requiere_cursada || [];
   return `
   <div class="border rounded-xl p-3 active:opacity-80">
     <div class="flex items-start justify-between gap-3">
-      <div>
+      <div class="min-w-0">
         <div class="text-sm md:text-base font-semibold break-words">${curso.codigo} — ${curso.nombre}</div>
-        <div class="text-xs text-gray-600">Año: ${curso.anio ?? '—'} | Correlativas: ${prereq}</div>
+        <div class="text-xs text-gray-600">Año: ${curso.anio ?? '—'} · Régimen: ${curso.regimen || '—'} · Formato: ${curso.formato || '—'}</div>
+        <div class="text-xs text-gray-600 mt-0.5">
+          Acreditar: <span class="text-gray-800">${listOrDash(reqAcred)}</span>
+          ${reqCurs && reqCurs.length ? ` · Cursada: <span class="text-gray-800">${listOrDash(reqCurs)}</span>` : ''}
+        </div>
       </div>
       <span class="text-[11px] md:text-xs px-2 py-1 rounded-full ${chipForStatus(status)} whitespace-nowrap">${status}</span>
     </div>
-    <div class="flex items-center gap-3 mt-2">
+    <div class="flex items-center flex-wrap gap-3 mt-2">
       <label class="text-sm flex items-center gap-2 select-none">
-        <input type="checkbox" data-codigo="${curso.codigo}" class="aprobadoToggle h-5 w-5 rounded" ${aprobadasSet.has(curso.codigo) ? 'checked' : ''}>
+        <input type="checkbox" data-kind="cursada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${cursadasSet.has(curso.codigo) ? 'checked' : ''}>
+        Cursada
+      </label>
+      <label class="text-sm flex items-center gap-2 select-none">
+        <input type="checkbox" data-kind="aprobada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${aprobadasSet.has(curso.codigo) ? 'checked' : ''}>
         Aprobada
       </label>
       <button class="text-xs border px-2 py-1.5 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring active:opacity-80 min-h-[36px]" data-center="${curso.codigo}">Ver en gráfico</button>
@@ -189,7 +215,8 @@ function makeCourseCard(curso, status, aprobadasSet) {
   </div>`;
 }
 
-function renderCourseList(cursos, aprobadasSet, fuse, ui) {
+/* ------------------------- Listado ------------------------- */
+function renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui) {
   const query = ui.searchInput.value.trim();
   const year = ui.yearFilter.value;
   const hideLocked = ui.hideLocked.checked;
@@ -197,19 +224,17 @@ function renderCourseList(cursos, aprobadasSet, fuse, ui) {
   const groupByYear = ui.groupByYear.checked;
 
   let filtered = cursos.slice();
-  if (query) {
-    filtered = fuse.search(query).map(r => r.item);
-  }
-  if (year) {
-    filtered = filtered.filter(c => String(c.anio || '') === year);
-  }
+  if (query) filtered = fuse.search(query).map(r => r.item);
+  if (year) filtered = filtered.filter(c => String(c.anio || '') === year);
 
   const withStatus = filtered.map(c => {
-    const st = computeStatus(c, aprobadasSet);
+    const st = computeStatus(c, aprobadasSet, cursadasSet);
     return { curso: c, status: st };
   }).filter(({curso, status}) => {
     if (hideLocked && status === 'bloqueada') return false;
-    if (hideNoPrereq && (!curso.prerequisitos || !curso.prerequisitos.length)) return false;
+    const sinPrevias = !( (curso.requiere_acreditar && curso.requiere_acreditar.length) ||
+                          (curso.requiere_cursada && curso.requiere_cursada.length) );
+    if (hideNoPrereq && sinPrevias) return false;
     return true;
   });
 
@@ -229,24 +254,25 @@ function renderCourseList(cursos, aprobadasSet, fuse, ui) {
     for (const y of ys) {
       html += `<div class="mt-3"><div class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Año ${y}</div>`;
       for (const {curso, status} of groups[y]) {
-        html += makeCourseCard(curso, status, aprobadasSet);
+        html += makeCourseCard(curso, status, aprobadasSet, cursadasSet);
       }
       html += `</div>`;
     }
   } else {
     for (const {curso, status} of withStatus) {
-      html += makeCourseCard(curso, status, aprobadasSet);
+      html += makeCourseCard(curso, status, aprobadasSet, cursadasSet);
     }
   }
 
   ui.courseList.innerHTML = html;
 }
 
-function buildGraph(cursos, relaciones, aprobadasSet) {
+/* ------------------------- Grafo ------------------------- */
+function buildGraph(cursos, relaciones, aprobadasSet, cursadasSet) {
   const cy = cytoscape({
     container: document.getElementById('cy'),
     elements: [
-      ...cursos.map(c => ({ data: { id: c.codigo, label: `${c.codigo}\\n${c.nombre}` } })),
+      ...cursos.map(c => ({ data: { id: c.codigo, label: `${c.codigo}\n${c.nombre}` } })),
       ...relaciones.map(e => ({ data: { id: e.from + '->' + e.to, source: e.from, target: e.to } })),
     ],
     style: [
@@ -260,8 +286,9 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
           'font-size': 10,
           'background-color': ele => {
             const code = ele.data('id');
-            const curso = cursos.find(x => x.codigo === code);
-            const status = computeStatus(curso, aprobadasSet);
+            // Buscar curso y estado
+            const curso = window.__cursos__.find(x => x.codigo === code);
+            const status = computeStatus(curso, aprobadasSet, cursadasSet);
             return colorForStatus(status);
           },
           'border-width': 1,
@@ -294,10 +321,12 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
   return cy;
 }
 
+/* ------------------------- App ------------------------- */
 (async function init() {
   const data = await loadData();
   const cursos = data.cursos || [];
   const relaciones = data.relaciones || [];
+  window.__cursos__ = cursos;
 
   // UI refs
   const ui = {
@@ -329,22 +358,22 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
   }
 
   // Load saved state
-  const saved = JSON.parse(localStorage.getItem('aprobadas') || '[]');
-  const aprobadasSet = new Set(saved);
+  const aprobadasSet = new Set(JSON.parse(localStorage.getItem('aprobadas') || '[]'));
+  const cursadasSet  = new Set(JSON.parse(localStorage.getItem('cursadas')  || '[]'));
 
   // Build search index
   const fuse = buildFuseIndex(cursos);
 
   // Render graph
-  let cy = buildGraph(cursos, relaciones, aprobadasSet);
+  let cy = buildGraph(cursos, relaciones, aprobadasSet, cursadasSet);
 
   function refresh() {
-    renderCourseList(cursos, aprobadasSet, fuse, ui);
+    renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui);
     // Recolor nodes
     cy.nodes().forEach(n => {
       const code = n.id();
       const curso = cursos.find(x => x.codigo === code);
-      const status = computeStatus(curso, aprobadasSet);
+      const status = computeStatus(curso, aprobadasSet, cursadasSet);
       n.style('background-color', colorForStatus(status));
     });
   }
@@ -352,19 +381,30 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
   // Initial render
   refresh();
 
-  // Listeners
-  ui.searchInput.addEventListener('input', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
-  ui.yearFilter.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
-  ui.hideLocked.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
-  ui.hideNoPrereq.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
-  ui.groupByYear.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
+  // Listeners: filtros
+  ui.searchInput.addEventListener('input', () => renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui));
+  ui.yearFilter.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui));
+  ui.hideLocked.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui));
+  ui.hideNoPrereq.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui));
+  ui.groupByYear.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui));
 
-  // Delegate list interactions
+  // Delegate list interactions (Cursada/Aprobada + centrar en grafo)
   ui.courseList.addEventListener('change', (e) => {
-    if (e.target.classList.contains('aprobadoToggle')) {
+    if (e.target.classList.contains('stateToggle')) {
       const code = e.target.getAttribute('data-codigo');
-      if (e.target.checked) aprobadasSet.add(code); else aprobadasSet.delete(code);
+      const kind = e.target.getAttribute('data-kind'); // 'cursada' | 'aprobada'
+      const checked = e.target.checked;
+
+      if (kind === 'aprobada') {
+        if (checked) { aprobadasSet.add(code); cursadasSet.delete(code); } // si aprobó, ya no hace falta "cursada"
+        else { aprobadasSet.delete(code); }
+      } else if (kind === 'cursada') {
+        if (checked) { if (!aprobadasSet.has(code)) cursadasSet.add(code); } // no sobrescribas aprobada
+        else { cursadasSet.delete(code); }
+      }
+
       localStorage.setItem('aprobadas', JSON.stringify(Array.from(aprobadasSet)));
+      localStorage.setItem('cursadas',  JSON.stringify(Array.from(cursadasSet)));
       refresh();
     }
   });
@@ -393,10 +433,8 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
   });
 
   // Graph buttons (mobile duplicates)
-  const fitHandlers = [ui.fitBtnMobile, ui.fitBtnDock].filter(Boolean);
-  fitHandlers.forEach(btn => btn.addEventListener('click', () => cy.fit(null, 40)));
-  const pngHandlers = [ui.exportPngBtnMobile, ui.exportPngBtnDock].filter(Boolean);
-  pngHandlers.forEach(btn => btn.addEventListener('click', () => {
+  [ui.fitBtnMobile, ui.fitBtnDock].filter(Boolean).forEach(btn => btn.addEventListener('click', () => cy.fit(null, 40)));
+  [ui.exportPngBtnMobile, ui.exportPngBtnDock].filter(Boolean).forEach(btn => btn.addEventListener('click', () => {
     const png = cy.png({ full: true, scale: 2, bg: '#ffffff' });
     const a = document.createElement('a');
     a.href = png;
@@ -421,18 +459,20 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
     ui.hideLocked.checked = false;
     ui.hideNoPrereq.checked = false;
     ui.groupByYear.checked = false;
-    renderCourseList(cursos, aprobadasSet, fuse, ui);
+    renderCourseList(cursos, aprobadasSet, cursadasSet, fuse, ui);
   });
 
-  // Click node toggles approval
+  // Click node toggles APROBADA (atajo)
   cy.on('tap', 'node', (evt) => {
     const id = evt.target.id();
-    if (aprobadasSet.has(id)) aprobadasSet.delete(id); else aprobadasSet.add(id);
+    if (aprobadasSet.has(id)) { aprobadasSet.delete(id); }
+    else { aprobadasSet.add(id); cursadasSet.delete(id); } // aprobar saca 'cursada'
     localStorage.setItem('aprobadas', JSON.stringify(Array.from(aprobadasSet)));
+    localStorage.setItem('cursadas',  JSON.stringify(Array.from(cursadasSet)));
     refresh();
   });
 
-  // Resize observer to keep graph healthy
+  // Mantener grafo sano en cambios de tamaño
   window.addEventListener('resize', () => cy.resize());
 })();
 </script>
