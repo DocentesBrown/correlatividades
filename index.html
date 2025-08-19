@@ -6,140 +6,150 @@
   <title>Plan de Estudios – Visualizador y Planificador</title>
   <script src="https://unpkg.com/fuse.js@7.0.0"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2canvas para exportar PNG -->
   <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    html, body { height: 100%; }
-    /* Colores */
-    .status-green { background:#22c55e; color:#0a2e12; } /* disponible & habilitada */
-    .status-red { background:#ef4444; color:#3a0a0a; }   /* bloqueada */
-    .status-gray { background:#d1d5db; color:#1f2937; }  /* aprobada  */
-
-    .tile {
-      border-radius: 12px;
-      border: 1px solid #11182722;
-      transition: transform .08s ease, box-shadow .12s ease, background .2s ease;
-      padding: 8px; /* más pequeños */
+    :root{
+      --prim:#24496e;      /* azul */
+      --acento:#f3efdc;    /* crema */
+      --ok:#22c55e;        /* verde estados */
+      --err:#ef4444;       /* rojo */
+      --done:#d1d5db;      /* gris aprobada */
     }
-    .tile:active { transform: scale(.98); }
-    .tile:hover { box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+    html, body { height: 100%; background: var(--acento); }
+    .brand-header{ background: #fff; border-bottom: 3px solid var(--prim); }
+    .brand-chip{ background: var(--acento); color: var(--prim); border: 1px solid var(--prim); }
+    .btn{ border:1px solid var(--prim); color:var(--prim); border-radius:12px; padding:.5rem .75rem; }
+    .btn:hover{ background: #ffffff99; }
 
-    /* Matriz 3 columnas fijas */
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
+    /* Tarjetas de lista */
+    .card{ background:#fff; border:1px solid #00000014; border-radius:16px; }
 
-    dialog::backdrop { background: rgba(0,0,0,.35); }
-    dialog {
-      border: none; border-radius: 16px; padding:0;
-      width: min(92vw, 460px);
-      box-shadow: 0 30px 60px rgba(0,0,0,.25);
+    /* Matriz: ocupa TODO el ancho, con tiles respirando
+       - En móvil muy chico: 2 col
+       - >=480px: 3 col
+       - >=768px: auto-fit min 180px para usar mejor el ancho en desktop
+    */
+    .matrix-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
     }
+    @media (min-width:480px){ .matrix-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (min-width:768px){ .matrix-grid{ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }
+
+    .tile{
+      border:1px solid #00000022;
+      border-radius:14px;
+      padding:10px;
+      transition:transform .08s ease, box-shadow .12s ease, background .2s ease;
+      text-align:left;
+    }
+    .tile:active{ transform:scale(.98); }
+    .tile:hover{ box-shadow:0 6px 18px rgba(0,0,0,.08); }
+    .st-green{ background: var(--ok); color:#0b3115; }
+    .st-red{ background: var(--err); color:#3a0a0a;}
+    .st-gray{ background: var(--done); color:#1f2937;}
+
+    dialog::backdrop{ background:rgba(0,0,0,.35); }
+    dialog{ border:none; border-radius:16px; padding:0; width:min(92vw,460px); box-shadow:0 30px 60px rgba(0,0,0,.25); }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="text-gray-900">
   <!-- Header -->
-  <header class="px-4 py-3 bg-white shadow-sm sticky top-0 z-20">
+  <header class="brand-header px-4 py-3 sticky top-0 z-20">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <div>
-        <h1 class="text-xl md:text-2xl font-bold leading-tight">Plan de Estudios</h1>
-        <p class="text-xs md:text-sm text-gray-600">
-          Checklist primero. Matriz debajo. Marcá Cursada/Aprobada y cargá notas.
-        </p>
+        <h1 class="text-xl md:text-2xl font-bold leading-tight" style="color:var(--prim)">Plan de Estudios</h1>
+        <p class="text-xs md:text-sm" style="color:var(--prim)">Checklist primero. Matriz debajo. Paleta: #24496e / #f3efdc</p>
       </div>
       <div class="text-right">
-        <div class="text-xs text-gray-500">Promedio general</div>
-        <div id="promedioSpan" class="text-lg font-bold">—</div>
+        <div class="text-xs text-gray-500">Promedio</div>
+        <div id="promedioSpan" class="text-lg font-bold" style="color:var(--prim)">—</div>
       </div>
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-    <!-- ✅ Checklist primero -->
-    <section class="lg:col-span-1 order-1" id="listSection">
-      <details class="bg-white rounded-2xl shadow open:md:open" open>
+  <!-- Main: Checklist primero, matriz debajo a ancho completo -->
+  <main class="max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 gap-4 md:gap-6">
+    <!-- ✅ CHECKLIST -->
+    <section id="listSection" class="order-1">
+      <details class="card open:md:open" open>
         <summary class="cursor-pointer list-none px-4 py-3 md:px-5 md:py-4 border-b flex items-center justify-between">
-          <span class="font-semibold">Controles</span>
+          <span class="font-semibold" style="color:var(--prim)">Controles</span>
           <span class="text-xs text-gray-500 md:hidden">tocar para abrir/cerrar</span>
         </summary>
         <div class="p-4 md:p-5 space-y-3 md:space-y-4">
           <div>
-            <label class="text-sm font-medium">Buscar materia</label>
-            <input id="searchInput" class="mt-1 w-full border rounded-xl px-4 py-3 text-base outline-none focus:ring focus:ring-indigo-200" placeholder="Nombre o código..." inputmode="text" />
+            <label class="text-sm font-medium" style="color:var(--prim)">Buscar materia</label>
+            <input id="searchInput" class="mt-1 w-full border rounded-xl px-4 py-3 text-base outline-none focus:ring focus:ring-[var(--prim)]/20" placeholder="Nombre o código..." inputmode="text" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-sm font-medium">Año</label>
-              <select id="yearFilter" class="mt-1 w-full border rounded-xl px-3 py-3 text-base outline-none focus:ring focus:ring-indigo-200">
+              <label class="text-sm font-medium" style="color:var(--prim)">Año</label>
+              <select id="yearFilter" class="mt-1 w-full border rounded-xl px-3 py-3 text-base outline-none focus:ring focus:ring-[var(--prim)]/20">
                 <option value="">Todos</option>
               </select>
             </div>
             <div class="flex items-end">
-              <button id="clearFilters" class="w-full border px-3 py-3 rounded-xl hover:bg-gray-50 text-sm md:text-base min-h-[44px]">Limpiar</button>
+              <button id="clearFilters" class="btn w-full">Limpiar</button>
             </div>
           </div>
 
           <div class="flex items-center gap-3">
             <input id="hideLocked" type="checkbox" class="h-5 w-5 rounded">
-            <label for="hideLocked" class="text-sm select-none">Ocultar bloqueadas</label>
+            <label for="hideLocked" class="text-sm select-none" style="color:var(--prim)">Ocultar bloqueadas</label>
           </div>
           <div class="flex items-center gap-3">
             <input id="hideNoPrereq" type="checkbox" class="h-5 w-5 rounded">
-            <label for="hideNoPrereq" class="text-sm select-none">Ocultar sin correlativas</label>
+            <label for="hideNoPrereq" class="text-sm select-none" style="color:var(--prim)">Ocultar sin correlativas</label>
           </div>
           <div class="flex items-center gap-3">
             <input id="groupByYearList" type="checkbox" class="h-5 w-5 rounded">
-            <label for="groupByYearList" class="text-sm select-none">Agrupar por año (lista)</label>
+            <label for="groupByYearList" class="text-sm select-none" style="color:var(--prim)">Agrupar por año (lista)</label>
           </div>
 
-          <p class="text-xs text-gray-500">Tip: “Aprobada” abre un modal para nota. Si cancelás, no cambia el estado.</p>
+          <p class="text-xs" style="color:var(--prim)">“Aprobada” abre un modal para nota (si cancelás, no cambia nada).</p>
         </div>
       </details>
 
-      <div class="bg-white rounded-2xl shadow mt-4">
+      <div class="card mt-4">
         <div class="px-4 py-3 border-b flex items-center justify-between">
-          <h2 class="font-semibold">Materias</h2>
-          <button id="scrollToMatrixBtn" class="text-xs border px-2 py-1.5 rounded-lg hover:bg-gray-50 md:hidden min-h-[36px]">Ir a la matriz</button>
+          <h2 class="font-semibold" style="color:var(--prim)">Materias</h2>
+          <span class="brand-chip text-xs px-2 py-1 rounded-md">Checklist</span>
         </div>
-        <div id="courseList" class="space-y-2 max-h-[58vh] md:max-h-[65vh] overflow-auto p-3 pr-1"></div>
+        <div id="courseList" class="space-y-2 max-h-[60vh] md:max-h-[65vh] overflow-auto p-3 pr-1"></div>
       </div>
     </section>
 
-    <!-- 🔳 Matriz debajo (en móvil y desktop) -->
-    <section class="lg:col-span-2 order-2">
-      <div class="bg-white rounded-2xl shadow overflow-hidden">
+    <!-- 🔳 MATRIZ: ocupa todo el ancho -->
+    <section class="order-2">
+      <div class="card overflow-hidden">
         <div class="flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b">
-          <h2 class="font-semibold text-base md:text-lg">Matriz de correlatividades (3 columnas, sin flechas)</h2>
-          <div class="hidden md:flex gap-2">
-            <button id="exportPNG" class="text-sm border px-3 py-2 rounded-xl hover:bg-gray-50 min-h-[44px]">PNG</button>
-          </div>
+          <h2 class="font-semibold" style="color:var(--prim)">Matriz de correlatividades (sin flechas)</h2>
+          <button id="exportPNG" class="btn">PNG</button>
         </div>
         <div class="p-3 md:p-4">
           <div class="flex flex-wrap gap-2 items-center mb-3">
-            <span class="text-sm text-gray-600">Ordenar por:</span>
+            <span class="text-sm" style="color:var(--prim)">Ordenar por:</span>
             <select id="matrixOrder" class="border rounded-lg px-2 py-1.5 text-sm">
               <option value="anio_codigo">Año → Código</option>
               <option value="nombre">Nombre</option>
-              <option value="estado">Estado (Disponible/Habilitada/Bloqueada/Aprobada)</option>
+              <option value="estado">Estado</option>
             </select>
-            <label class="flex items-center gap-2 text-sm ml-auto">
-              <input type="checkbox" id="groupYear" class="h-4 w-4">
-              Agrupar por año
+            <label class="flex items-center gap-2 text-sm ml-auto" style="color:var(--prim)">
+              <input type="checkbox" id="groupYear" class="h-4 w-4"> Agrupar por año
             </label>
           </div>
-          <div id="matrixContainer" class="grid-3 min-h-[40vh]"></div>
+          <div id="matrixContainer" class="matrix-grid min-h-[40vh]"></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow p-4 md:p-5 mt-4 md:mt-6">
-        <h3 class="font-semibold mb-2">Leyenda</h3>
+      <div class="card p-4 md:p-5 mt-4 md:mt-6">
+        <h3 class="font-semibold mb-2" style="color:var(--prim)">Leyenda</h3>
         <ul class="text-sm text-gray-700 grid grid-cols-2 gap-x-6 gap-y-1">
-          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>Disponible / Habilitada</li>
-          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>Bloqueada</li>
-          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-gray-300 mr-2"></span>Aprobada</li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full" style="background:var(--ok)"></span><span class="ml-2">Disponible / Habilitada</span></li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full" style="background:var(--err)"></span><span class="ml-2">Bloqueada</span></li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full" style="background:var(--done)"></span><span class="ml-2">Aprobada</span></li>
         </ul>
       </div>
     </section>
@@ -148,92 +158,85 @@
   <!-- Modal de Nota -->
   <dialog id="notaDialog">
     <form method="dialog" class="p-5">
-      <h3 class="text-lg font-semibold mb-1">Cargar nota</h3>
+      <h3 class="text-lg font-semibold mb-1" style="color:var(--prim)">Cargar nota</h3>
       <p id="notaMateria" class="text-sm text-gray-600 mb-3"></p>
       <div class="flex items-center gap-3 mb-4">
         <input id="notaInput" type="number" min="0" max="10" step="0.1" class="border rounded-lg px-3 py-2 w-32" placeholder="0 – 10" />
-        <button id="notaClear" type="button" class="text-sm underline text-gray-600">Quitar nota</button>
+        <button id="notaClear" type="button" class="text-sm underline" style="color:var(--prim)">Quitar nota</button>
       </div>
       <div class="flex justify-end gap-2">
-        <button id="notaCancel" value="cancel" class="border px-3 py-2 rounded-lg">Cancelar</button>
-        <button id="notaSave" value="ok" class="bg-indigo-600 text-white px-3 py-2 rounded-lg">Guardar</button>
+        <button id="notaCancel" value="cancel" class="btn">Cancelar</button>
+        <button id="notaSave" value="ok" class="btn" style="background:var(--prim); color:#fff">Guardar</button>
       </div>
     </form>
   </dialog>
 
-  <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-gray-500">
-    App libre y estática. Publicable en GitHub Pages/Netlify.
+  <footer class="max-w-7xl mx-auto px-4 py-6 text-xs" style="color:var(--prim)">
+    App estática. Paleta aplicada. Export PNG de la matriz incluido.
   </footer>
 
 <script>
-/* ------------------------- Carga de datos ------------------------- */
+/* --------------- Datos --------------- */
 async function loadData() {
   const res = await fetch('data_plan_estudios.json');
   return await res.json();
 }
 
-/* ------------------------- Búsqueda ------------------------- */
+/* --------------- Búsqueda --------------- */
 function buildFuseIndex(cursos) {
-  return new Fuse(cursos, {
-    includeScore: true,
-    keys: ['codigo', 'nombre'],
-    threshold: 0.3,
-    ignoreLocation: true,
-  });
+  return new Fuse(cursos, { includeScore: true, keys: ['codigo','nombre'], threshold: 0.3, ignoreLocation: true });
 }
 
-/* ------------------------- Estado ------------------------- */
+/* --------------- Estado (incluye OR) --------------- */
 /* Reglas:
-- REQUIERE ACREDITAR -> todas deben estar en Aprobadas.
-- REQUIERE CURSADA   -> todas deben estar en Cursadas o Aprobadas.
+   - requiere_acreditar: TODAS esas deben estar aprobadas (AND)
+   - requiere_acreditar_any: lista de grupos; de CADA grupo debe cumplirse "al menos UNA" (OR por grupo)
+   - requiere_cursada: TODAS deben estar en Cursadas o Aprobadas (AND)
 */
 function computeStatus(curso, aprobadasSet, cursadasSet) {
-  const reqAcred = curso.requiere_acreditar || curso.prerequisitos || [];
-  const reqCurs  = curso.requiere_cursada || [];
+  const reqA = curso.requiere_acreditar || curso.prerequisitos || [];
+  const reqAny = Array.isArray(curso.requiere_acreditar_any) ? curso.requiere_acreditar_any : [];
+  const reqC = curso.requiere_cursada || [];
 
   if (aprobadasSet.has(curso.codigo)) return 'aprobada';
-  if (!reqAcred.length && !reqCurs.length) return 'disponible';
+  if (!reqA.length && !reqAny.length && !reqC.length) return 'disponible';
 
-  const okAcred = reqAcred.every(p => aprobadasSet.has(p));
-  const okCurs  = reqCurs.every(p => cursadasSet.has(p) || aprobadasSet.has(p));
+  const okAND = reqA.every(p => aprobadasSet.has(String(p)));
+  const okANY = reqAny.every(group => {
+    if (!Array.isArray(group) || group.length === 0) return true;
+    return group.some(p => aprobadasSet.has(String(p)));
+  });
+  const okCURS = reqC.every(p => cursadasSet.has(String(p)) || aprobadasSet.has(String(p)));
 
-  return (okAcred && okCurs) ? 'habilitada' : 'bloqueada';
-}
-function tileClassByStatus(st) {
-  // Disponible y Habilitada => mismo VERDE
-  if (st === 'aprobada')  return 'status-gray';
-  if (st === 'bloqueada') return 'status-red';
-  return 'status-green'; // disponible o habilitada
+  return (okAND && okANY && okCURS) ? 'habilitada' : 'bloqueada';
 }
 
-/* ------------------------- Almacenamiento ------------------------- */
+/* --------------- Storage --------------- */
 function loadSets() {
   return {
-    aprobadasSet: new Set(JSON.parse(localStorage.getItem('aprobadas') || '[]')),
-    cursadasSet:  new Set(JSON.parse(localStorage.getItem('cursadas')  || '[]')),
-    notas:        JSON.parse(localStorage.getItem('notas')     || '{}'),
+    aprobadasSet: new Set(JSON.parse(localStorage.getItem('aprobadas') || '[]').map(String)),
+    cursadasSet:  new Set(JSON.parse(localStorage.getItem('cursadas')  || '[]').map(String)),
+    notas:        JSON.parse(localStorage.getItem('notas') || '{}'),
   };
 }
 function saveSets(aprobadasSet, cursadasSet, notas) {
-  localStorage.setItem('aprobadas', JSON.stringify(Array.from(aprobadasSet)));
-  localStorage.setItem('cursadas',  JSON.stringify(Array.from(cursadasSet)));
+  localStorage.setItem('aprobadas', JSON.stringify([...aprobadasSet]));
+  localStorage.setItem('cursadas',  JSON.stringify([...cursadasSet]));
   localStorage.setItem('notas',     JSON.stringify(notas));
 }
 
-/* ------------------------- Promedio ------------------------- */
+/* --------------- Promedio --------------- */
 function computePromedio(notas) {
-  const vals = Object.values(notas).map(v => Number(v)).filter(v => !Number.isNaN(v));
+  const vals = Object.values(notas).map(Number).filter(v => !Number.isNaN(v));
   if (!vals.length) return null;
-  const m = vals.reduce((a,b) => a+b, 0) / vals.length;
-  return Math.round(m * 100) / 100;
+  return Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*100)/100;
 }
 function renderPromedio(notas) {
-  const span = document.getElementById('promedioSpan');
   const p = computePromedio(notas);
-  span.textContent = (p == null) ? '—' : p.toFixed(2);
+  document.getElementById('promedioSpan').textContent = (p==null) ? '—' : p.toFixed(2);
 }
 
-/* ------------------------- Modal de Nota (Promise) ------------------------- */
+/* --------------- Modal Nota (Promise) --------------- */
 function openNotaModal(curso, notas) {
   const dlg = document.getElementById('notaDialog');
   const txt = document.getElementById('notaMateria');
@@ -246,226 +249,179 @@ function openNotaModal(curso, notas) {
   input.value = (curso.codigo in notas) ? notas[curso.codigo] : '';
 
   return new Promise(resolve => {
-    const onClose = () => {
-      dlg.removeEventListener('close', onClose);
-      resolve({ saved: dlg.returnValue === 'ok', value: input.value.trim() });
-    };
+    const onClose = () => { dlg.removeEventListener('close', onClose); resolve({ saved: dlg.returnValue==='ok', value: input.value.trim() }); };
     dlg.addEventListener('close', onClose);
-
-    clear.onclick = () => { input.value = ''; };
-    btnSave.onclick = (e) => {
-      e.preventDefault();
-      const v = input.value.trim();
-      if (v !== '' && (Number(v) < 0 || Number(v) > 10)) return; // rango 0-10
-      dlg.close('ok');
-    };
-    btnCancel.onclick = (e) => {
-      e.preventDefault();
-      dlg.close('cancel');
-    };
-
+    clear.onclick = () => { input.value=''; };
+    btnSave.onclick = (e)=>{ e.preventDefault(); const v=input.value.trim(); if (v!=='' && (Number(v)<0 || Number(v)>10)) return; dlg.close('ok'); };
+    btnCancel.onclick = (e)=>{ e.preventDefault(); dlg.close('cancel'); };
     dlg.showModal();
   });
 }
 
-/* ------------------------- UI: Tarjetas de lista ------------------------- */
-function listOrDash(arr) { return (!arr || !arr.length) ? '—' : arr.join(', '); }
+/* --------------- LISTA --------------- */
+function listOrDash(arr){ return (!arr || !arr.length) ? '—' : arr.join(', '); }
 
 function makeCourseCard(curso, status, aprobadasSet, cursadasSet, notas) {
-  const reqAcred = curso.requiere_acreditar || [];
-  const reqCurs  = curso.requiere_cursada || [];
-  const notaTxt  = (curso.codigo in notas) ? ` · Nota: ${notas[curso.codigo]}` : '';
+  const reqA = curso.requiere_acreditar || [];
+  const reqAny = Array.isArray(curso.requiere_acreditar_any) ? curso.requiere_acreditar_any : [];
+  const reqC = curso.requiere_cursada || [];
+  const notaTxt = (curso.codigo in notas) ? ` · Nota: ${notas[curso.codigo]}` : '';
+
+  const anyTxt = reqAny.length ? ' · Acreditar (OR): '+ reqAny.map(g=>`(${g.join(' / ')})`).join(' ∧ ') : '';
+
   return `
-  <div class="border rounded-xl p-3 active:opacity-80">
+  <div class="card p-3 active:opacity-80">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <div class="text-sm md:text-base font-semibold break-words">${curso.codigo} — ${curso.nombre}</div>
+        <div class="text-sm md:text-base font-semibold break-words" style="color:var(--prim)">${curso.codigo} — ${curso.nombre}</div>
         <div class="text-xs text-gray-600">Año: ${curso.anio ?? '—'} · Régimen: ${curso.regimen || '—'} · Formato: ${curso.formato || '—'}${notaTxt}</div>
         <div class="text-xs text-gray-600 mt-0.5">
-          Acreditar: <span class="text-gray-800">${listOrDash(reqAcred)}</span>
-          ${reqCurs.length ? ` · Cursada: <span class="text-gray-800">${listOrDash(reqCurs)}</span>` : ''}
+          Acreditar (AND): <span class="text-gray-800">${listOrDash(reqA)}</span>${anyTxt}
+          ${reqC.length ? ` · Cursada: <span class="text-gray-800">${listOrDash(reqC)}</span>` : ''}
         </div>
       </div>
-      <span class="text-[11px] md:text-xs px-2 py-1 rounded-full bg-white border">${status}</span>
+      <span class="brand-chip text-[11px] md:text-xs px-2 py-1 rounded-full">${status}</span>
     </div>
     <div class="flex items-center flex-wrap gap-3 mt-2">
-      <label class="text-sm flex items-center gap-2 select-none">
-        <input type="checkbox" data-kind="cursada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${cursadasSet.has(curso.codigo) ? 'checked' : ''}>
+      <label class="text-sm flex items-center gap-2 select-none" style="color:var(--prim)">
+        <input type="checkbox" data-kind="cursada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${cursadasSet.has(String(curso.codigo)) ? 'checked' : ''}>
         Cursada
       </label>
-      <label class="text-sm flex items-center gap-2 select-none">
-        <input type="checkbox" data-kind="aprobada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${aprobadasSet.has(curso.codigo) ? 'checked' : ''}>
+      <label class="text-sm flex items-center gap-2 select-none" style="color:var(--prim)">
+        <input type="checkbox" data-kind="aprobada" data-codigo="${curso.codigo}" class="stateToggle h-5 w-5 rounded" ${aprobadasSet.has(String(curso.codigo)) ? 'checked' : ''}>
         Aprobada
       </label>
-      <button class="text-xs border px-2 py-1.5 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring active:opacity-80 min-h-[32px]" data-center="${curso.codigo}">Cargar/editar nota</button>
+      <button class="btn text-xs min-h-[32px]" data-center="${curso.codigo}">Cargar/editar nota</button>
     </div>
   </div>`;
 }
 
-function renderCourseList(cursos, aprobadasSet, cursadasSet, notas, fuse, ui) {
-  const query = ui.searchInput.value.trim();
-  const year = ui.yearFilter.value;
+function renderCourseList(cursos, aprobadasSet, cursadasSet, notas, fuse, ui){
+  const q = ui.searchInput.value.trim();
+  const yr = ui.yearFilter.value;
   const hideLocked = ui.hideLocked.checked;
   const hideNoPrereq = ui.hideNoPrereq.checked;
-  const groupByYear = ui.groupByYearList.checked;
+  const group = ui.groupByYearList.checked;
 
-  let filtered = cursos.slice();
-  if (query) filtered = fuse.search(query).map(r => r.item);
-  if (year) filtered = filtered.filter(c => String(c.anio || '') === year);
+  let arr = cursos.slice();
+  if (q) arr = fuse.search(q).map(r=>r.item);
+  if (yr) arr = arr.filter(c => String(c.anio || '') === yr);
 
-  const withStatus = filtered.map(c => {
-    const st = computeStatus(c, aprobadasSet, cursadasSet);
-    return { curso: c, status: st };
-  }).filter(({curso, status}) => {
-    if (hideLocked && status === 'bloqueada') return false;
-    const sinPrevias = !( (curso.requiere_acreditar && curso.requiere_acreditar.length) ||
-                          (curso.requiere_cursada && curso.requiere_cursada.length) );
-    if (hideNoPrereq && sinPrevias) return false;
+  const withStatus = arr.map(c => ({curso:c, status: computeStatus(c, aprobadasSet, cursadasSet)}))
+  .filter(({curso,status})=>{
+    if (hideLocked && status==='bloqueada') return false;
+    const sinPrev = !( (curso.requiere_acreditar && curso.requiere_acreditar.length) ||
+                       (curso.requiere_cursada && curso.requiere_cursada.length) ||
+                       (Array.isArray(curso.requiere_acreditar_any) && curso.requiere_acreditar_any.length) );
+    if (hideNoPrereq && sinPrev) return false;
     return true;
   });
 
-  let html = "";
-  if (groupByYear) {
-    const groups = {};
-    for (const row of withStatus) {
-      const y = row.curso.anio ?? '—';
-      if (!groups[y]) groups[y] = [];
-      groups[y].push(row);
-    }
-    const ys = Object.keys(groups).sort((a,b) => {
-      if (a === '—') return 1;
-      if (b === '—') return -1;
-      return Number(a) - Number(b);
-    });
-    for (const y of ys) {
-      html += `<div class="mt-3"><div class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Año ${y}</div>`;
-      for (const {curso, status} of groups[y]) {
-        html += makeCourseCard(curso, status, aprobadasSet, cursadasSet, notas);
-      }
+  let html="";
+  if (group){
+    const groups={};
+    for (const it of withStatus){ const y = it.curso.anio ?? '—'; (groups[y]??=[]).push(it); }
+    const ys = Object.keys(groups).sort((a,b)=> (a==='—')-(b==='—') || (Number(a)-Number(b)));
+    for (const y of ys){
+      html += `<div class="mt-3"><div class="text-[11px] uppercase tracking-wide" style="color:var(--prim)">Año ${y}</div>`;
+      for (const {curso,status} of groups[y]) html += makeCourseCard(curso,status,aprobadasSet,cursadasSet,notas);
       html += `</div>`;
     }
   } else {
-    for (const {curso, status} of withStatus) {
-      html += makeCourseCard(curso, status, aprobadasSet, cursadasSet, notas);
-    }
+    for (const {curso,status} of withStatus) html += makeCourseCard(curso,status,aprobadasSet,cursadasSet,notas);
   }
-
   ui.courseList.innerHTML = html;
 }
 
-/* ------------------------- Matriz (3 columnas, tiles pequeños) ------------------------- */
-function renderMatrix(cursos, aprobadasSet, cursadasSet, notas, ui) {
+/* --------------- MATRIZ (ancho completo, tiles respiran) --------------- */
+function classForStatus(st){
+  if (st==='aprobada') return 'st-gray';
+  if (st==='bloqueada') return 'st-red';
+  return 'st-green'; // disponible / habilitada
+}
+function renderMatrix(cursos, aprobadasSet, cursadasSet, notas, ui){
   const order = ui.matrixOrder.value;
   const group = ui.groupYear.checked;
 
   let arr = cursos.slice();
-  const byEstadoRank = c => {
+  const rankEstado = c => {
     const st = computeStatus(c, aprobadasSet, cursadasSet);
-    const rank = {disponible:0, habilitada:0, bloqueada:1, aprobada:2}[st] ?? 99; // disp/hab juntos
-    return [rank, c.anio ?? 99, c.codigo];
+    const r = {disponible:0, habilitada:0, bloqueada:1, aprobada:2}[st] ?? 99;
+    return [r, c.anio ?? 99, String(c.codigo)];
   };
-
-  if (order === 'anio_codigo') arr.sort((a,b) => (a.anio??99)-(b.anio??99) || String(a.codigo).localeCompare(String(b.codigo)));
-  if (order === 'nombre') arr.sort((a,b) => a.nombre.localeCompare(b.nombre));
-  if (order === 'estado') arr.sort((a,b) => {
-    const A = byEstadoRank(a), B = byEstadoRank(b);
-    return (A[0]-B[0]) || (A[1]-B[1]) || String(A[2]).localeCompare(String(B[2]));
-  });
+  if (order==='anio_codigo') arr.sort((a,b)=> (a.anio??99)-(b.anio??99) || String(a.codigo).localeCompare(String(b.codigo)));
+  if (order==='nombre') arr.sort((a,b)=> a.nombre.localeCompare(b.nombre));
+  if (order==='estado') arr.sort((a,b)=>{ const A=rankEstado(a),B=rankEstado(b); return (A[0]-B[0])||(A[1]-B[1])||A[2].localeCompare(B[2]); });
 
   const container = document.getElementById('matrixContainer');
   container.innerHTML = '';
 
-  const pushTile = (c, parent) => {
+  const addTile = (c, parent) => {
     const st = computeStatus(c, aprobadasSet, cursadasSet);
-    const cls = tileClassByStatus(st);
-    const notaTxt  = (c.codigo in notas) ? ` · ${notas[c.codigo]}` : '';
+    const cls = classForStatus(st);
+    const notaTxt = (c.codigo in notas) ? ` · ${notas[c.codigo]}` : '';
     const btn = document.createElement('button');
-    btn.className = `tile text-left ${cls}`;
-    btn.setAttribute('data-code', c.codigo);
+    btn.className = `tile ${cls}`;
+    btn.setAttribute('data-code', String(c.codigo));
     btn.innerHTML = `
       <div class="text-[11px] opacity-90">#${c.codigo} · A${c.anio ?? '—'}</div>
-      <div class="text-xs font-semibold leading-snug line-clamp-3">${c.nombre}</div>
+      <div class="text-xs font-semibold leading-snug">${c.nombre}</div>
       <div class="text-[10px] opacity-90 mt-1">${st}${notaTxt}</div>
     `;
-    btn.addEventListener('click', async () => {
-      // Intento de aprobar con modal de nota. No cambiamos estado si cancela.
-      const wasAprob = aprobadasSet.has(c.codigo);
-      if (wasAprob) {
-        const res = await openNotaModal(c, notas);
-        if (res.saved) {
-          const v = res.value;
-          if (v === '') delete notas[c.codigo];
-          else notas[c.codigo] = String(Number(v));
-          saveSets(aprobadasSet, cursadasSet, notas);
-          renderAll();
-        }
+    btn.addEventListener('click', async ()=>{
+      // Solo cambiamos si GUARDA (si cancela, no tocamos)
+      const wasAprob = aprobadasSet.has(String(c.codigo));
+      const res = await openNotaModal(c, notas);
+      if (!res.saved) return;
+      const v = res.value;
+      if (wasAprob){
+        if (v==='') delete notas[c.codigo]; else notas[c.codigo]=String(Number(v));
       } else {
-        // Marca como Aprobada SOLO si guarda.
-        const res = await openNotaModal(c, notas);
-        if (res.saved) {
-          aprobadasSet.add(c.codigo);
-          cursadasSet.delete(c.codigo);
-          const v = res.value;
-          if (v === '') delete notas[c.codigo];
-          else notas[c.codigo] = String(Number(v));
-          saveSets(aprobadasSet, cursadasSet, notas);
-          renderAll();
-        }
+        aprobadasSet.add(String(c.codigo)); cursadasSet.delete(String(c.codigo));
+        if (v==='') delete notas[c.codigo]; else notas[c.codigo]=String(Number(v));
       }
+      saveSets(aprobadasSet, cursadasSet, notas);
+      renderAll();
     });
     parent.appendChild(btn);
   };
 
-  if (group) {
-    const groups = {};
-    for (const c of arr) {
-      const y = c.anio ?? '—';
-      if (!groups[y]) groups[y] = [];
-      groups[y].push(c);
-    }
-    const ys = Object.keys(groups).sort((a,b) => {
-      if (a === '—') return 1;
-      if (b === '—') return -1;
-      return Number(a)-Number(b);
-    });
-
-    ys.forEach(y => {
+  if (group){
+    const groups={};
+    for (const c of arr){ const y=c.anio??'—'; (groups[y]??=[]).push(c); }
+    const ys = Object.keys(groups).sort((a,b)=> (a==='—')-(b==='—') || (Number(a)-Number(b)));
+    for (const y of ys){
       const h = document.createElement('div');
-      h.className = 'text-[11px] uppercase tracking-wide text-gray-500 mt-2 mb-1';
+      h.className = 'text-[11px] uppercase tracking-wide my-1';
+      h.style.color = 'var(--prim)';
       h.textContent = `Año ${y}`;
       container.appendChild(h);
-
-      const grid = document.createElement('div');
-      grid.className = 'grid-3';
-      container.appendChild(grid);
-
-      groups[y].forEach(c => pushTile(c, grid));
-    });
+      const grid = document.createElement('div'); grid.className='matrix-grid'; container.appendChild(grid);
+      groups[y].forEach(c=> addTile(c, grid));
+    }
   } else {
-    const grid = document.createElement('div');
-    grid.className = 'grid-3';
-    container.appendChild(grid);
-    arr.forEach(c => pushTile(c, grid));
+    const grid = document.createElement('div'); grid.className='matrix-grid'; container.appendChild(grid);
+    arr.forEach(c=> addTile(c, grid));
   }
 }
 
-/* ------------------------- Export PNG (matriz) ------------------------- */
-async function exportMatrixPNG() {
+/* --------------- Export PNG --------------- */
+async function exportMatrixPNG(){
   const el = document.getElementById('matrixContainer');
-  const canvas = await html2canvas(el, { backgroundColor: '#ffffff', scale: 2 });
-  const dataURL = canvas.toDataURL('image/png');
+  const canvas = await html2canvas(el, { backgroundColor:'#ffffff', scale:2 });
   const a = document.createElement('a');
-  a.href = dataURL;
+  a.href = canvas.toDataURL('image/png');
   a.download = 'matriz_correlatividades.png';
   a.click();
 }
 
-/* ------------------------- App ------------------------- */
-(async function init() {
+/* --------------- App --------------- */
+(async function init(){
   const data = await loadData();
-  const cursos = data.cursos || [];
+  const cursos = (data.cursos||[]).map(c=>({ ...c, codigo:String(c.codigo) })); // normalizo a string
+  // OJO: si ya agregaste "requiere_acreditar_any" en el JSON (p.ej. para 14: [["5","6","7"]]),
+  // la lógica computeStatus ya lo respeta.
 
-  // UI refs
   const ui = {
     searchInput: document.getElementById('searchInput'),
     yearFilter: document.getElementById('yearFilter'),
@@ -473,98 +429,79 @@ async function exportMatrixPNG() {
     hideNoPrereq: document.getElementById('hideNoPrereq'),
     groupByYearList: document.getElementById('groupByYearList'),
     courseList: document.getElementById('courseList'),
-    scrollToMatrixBtn: document.getElementById('scrollToMatrixBtn'),
-
-    // Matriz
     matrixOrder: document.getElementById('matrixOrder'),
     groupYear: document.getElementById('groupYear'),
   };
 
-  // Poblar filtro año
-  const years = Array.from(new Set(cursos.map(c => c.anio).filter(x => x != null))).sort((a,b)=>a-b);
-  for (const y of years) {
-    const opt = document.createElement('option');
-    opt.value = String(y);
-    opt.textContent = String(y);
-    ui.yearFilter.appendChild(opt);
-  }
+  // años
+  const years = Array.from(new Set(cursos.map(c=>c.anio).filter(x=>x!=null))).sort((a,b)=>a-b);
+  for (const y of years){ const o=document.createElement('option'); o.value=String(y); o.textContent=String(y); ui.yearFilter.appendChild(o); }
 
-  // Estado
+  // estado
   let { aprobadasSet, cursadasSet, notas } = loadSets();
 
-  // Búsqueda
+  // búsqueda
   const fuse = buildFuseIndex(cursos);
 
-  // Render helpers
-  function refreshList() {
-    renderCourseList(cursos, aprobadasSet, cursadasSet, notas, fuse, ui);
-  }
-  function refreshMatrix() {
-    renderMatrix(cursos, aprobadasSet, cursadasSet, notas, ui);
-  }
-  window.renderAll = function() {
-    refreshList();
-    refreshMatrix();
-    renderPromedio(notas);
-  }
+  // renders
+  function refreshList(){ renderCourseList(cursos, aprobadasSet, cursadasSet, notas, fuse, ui); }
+  function refreshMatrix(){ renderMatrix(cursos, aprobadasSet, cursadasSet, notas, ui); }
+  window.renderAll = function(){ refreshList(); refreshMatrix(); renderPromedio(notas); };
 
-  // Inicial
-  window.renderAll();
+  // inicial
+  renderAll();
 
-  // Listeners: filtros lista
+  // filtros lista
   ui.searchInput.addEventListener('input', refreshList);
   ui.yearFilter.addEventListener('change', refreshList);
   ui.hideLocked.addEventListener('change', refreshList);
   ui.hideNoPrereq.addEventListener('change', refreshList);
   ui.groupByYearList.addEventListener('change', refreshList);
 
-  // Navegación
-  ui.scrollToMatrixBtn?.addEventListener('click', () => {
-    document.getElementById('matrixContainer').scrollIntoView({ behavior:'smooth', block:'start' });
-  });
+  // export PNG
+  document.getElementById('exportPNG')?.addEventListener('click', exportMatrixPNG);
 
-  // Delegación en LISTA: estado + modal con cancelación que revierte
-  ui.courseList.addEventListener('change', async (e) => {
+  // checklist interactions
+  document.getElementById('courseList').addEventListener('change', async (e)=>{
     if (!e.target.classList.contains('stateToggle')) return;
-    const code = e.target.getAttribute('data-codigo');
+    const code = String(e.target.getAttribute('data-codigo'));
     const kind = e.target.getAttribute('data-kind');
     const checked = e.target.checked;
-    const curso = cursos.find(x => x.codigo === code);
+    const curso = cursos.find(x=>x.codigo===code);
 
-    if (kind === 'aprobada') {
-      if (checked) {
-        // Abrir modal y solo aprobar si guarda, si cancela revertir checkbox
+    if (kind==='aprobada'){
+      if (checked){
+        // Abrir modal; si CANCELA, revertimos el check y no tocamos nada
         const res = await openNotaModal(curso, notas);
-        if (res.saved) {
-          aprobadasSet.add(code);
-          cursadasSet.delete(code);
-          const v = res.value;
-          if (v === '') delete notas[code];
-          else notas[code] = String(Number(v));
-          saveSets(aprobadasSet, cursadasSet, notas);
-          renderAll();
-        } else {
-          // cancelar: revertir el check
-          e.target.checked = false;
-        }
+        if (!res.saved){ e.target.checked=false; return; }
+        aprobadasSet.add(code); cursadasSet.delete(code);
+        const v = res.value; if (v==='') delete notas[code]; else notas[code]=String(Number(v));
+        saveSets(aprobadasSet, cursadasSet, notas); renderAll();
       } else {
-        // Quitar aprobación
-        aprobadasSet.delete(code);
-        // Si querés, dejamos la nota; por ahora la quitamos:
-        delete notas[code];
-        saveSets(aprobadasSet, cursadasSet, notas);
-        renderAll();
+        aprobadasSet.delete(code); delete notas[code];
+        saveSets(aprobadasSet, cursadasSet, notas); renderAll();
       }
-    } else if (kind === 'cursada') {
-      if (checked) { if (!aprobadasSet.has(code)) cursadasSet.add(code); }
+    } else if (kind==='cursada'){
+      if (checked){ if (!aprobadasSet.has(code)) cursadasSet.add(code); }
       else { cursadasSet.delete(code); }
-      saveSets(aprobadasSet, cursadasSet, notas);
-      renderAll();
+      saveSets(aprobadasSet, cursadasSet, notas); renderAll();
     }
   });
 
-  // Botones export PNG
-  document.getElementById('exportPNG')?.addEventListener('click', exportMatrixPNG);
+  // botón “Cargar/editar nota”
+  document.getElementById('courseList').addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-center]'); if (!btn) return;
+    const code = String(btn.getAttribute('data-center'));
+    const curso = cursos.find(x=>x.codigo===code);
+    const res = await openNotaModal(curso, notas);
+    if (!res.saved) return;
+    const v = res.value; if (v==='') delete notas[code]; else notas[code]=String(Number(v));
+    saveSets(aprobadasSet, cursadasSet, notas); renderAll();
+  });
+
+  // controles matriz
+  ui.matrixOrder.addEventListener('change', refreshMatrix);
+  ui.groupYear.addEventListener('change', refreshMatrix);
 })();
 </script>
 </body>
