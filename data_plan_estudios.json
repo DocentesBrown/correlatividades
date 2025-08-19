@@ -136,18 +136,13 @@
     },
     {
       "codigo": "14",
-      "nombre": "Didáctica de las Ciencias naturales",
+      "nombre": "…",
       "anio": 2,
-      "regimen": "Anual",
-      "formato": "Asignatura",
-      "requiere_cursada": [
-        "5",
-        "6",
-        "o",
-        "7"
-      ],
+      "regimen": "…",
+      "formato": "…",
+      "requiere_cursada": [],
       "requiere_acreditar": [],
-      "prerequisitos": []
+      "requiere_acreditar_any": [["5", "6", "7"]]
     },
     {
       "codigo": "15",
@@ -157,7 +152,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "5",
-        "y",
         "8"
       ],
       "requiere_acreditar": [],
@@ -181,14 +175,9 @@
       "anio": 2,
       "regimen": "Cuatrimestral",
       "formato": "Taller",
-      "requiere_cursada": [
-        "8",
-        "y",
-        "5",
-        "o",
-        "6"
-      ],
+      "requiere_cursada": [],
       "requiere_acreditar": [],
+      "requiere_acreditar_any": [["8"], ["5","6"]]
       "prerequisitos": []
     },
     {
@@ -199,7 +188,6 @@
       "formato": "Taller",
       "requiere_cursada": [
         "7",
-        "y",
         "8"
       ],
       "requiere_acreditar": [],
@@ -227,13 +215,11 @@
       "requiere_acreditar": [
         "2",
         "5",
-        "y",
         "9"
       ],
       "prerequisitos": [
         "2",
         "5",
-        "y",
         "9"
       ]
     },
@@ -267,7 +253,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "3",
-        "y",
         "4"
       ],
       "requiere_acreditar": [],
@@ -282,7 +267,6 @@
       "requiere_cursada": [
         "5",
         "14",
-        "y",
         "17"
       ],
       "requiere_acreditar": [],
@@ -296,7 +280,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "15",
-        "y",
         "19"
       ],
       "requiere_acreditar": [],
@@ -310,7 +293,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "15",
-        "y",
         "19"
       ],
       "requiere_acreditar": [],
@@ -324,7 +306,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "15",
-        "y",
         "19"
       ],
       "requiere_acreditar": [],
@@ -338,7 +319,6 @@
       "formato": "Asignatura",
       "requiere_cursada": [
         "15",
-        "y",
         "19"
       ],
       "requiere_acreditar": [],
@@ -364,21 +344,24 @@
       "formato": "Taller y Terreno",
       "requiere_cursada": [
         "1",
-        "a",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
         "9",
-        "y",
         "15"
       ],
       "requiere_acreditar": [
         "10",
         "14",
-        "y",
         "20"
       ],
       "prerequisitos": [
         "10",
         "14",
-        "y",
         "20"
       ]
     },
@@ -446,7 +429,6 @@
         "17",
         "18",
         "25",
-        "y",
         "28"
       ],
       "requiere_acreditar": [],
@@ -461,7 +443,6 @@
       "requiere_cursada": [
         "16",
         "26",
-        "y",
         "28"
       ],
       "requiere_acreditar": [],
@@ -476,7 +457,6 @@
       "requiere_cursada": [
         "15",
         "25",
-        "y",
         "29"
       ],
       "requiere_acreditar": [],
@@ -491,7 +471,6 @@
       "requiere_cursada": [
         "15",
         "27",
-        "y",
         "28"
       ],
       "requiere_acreditar": [],
@@ -506,7 +485,6 @@
       "requiere_cursada": [
         "15",
         "28",
-        "y",
         "29"
       ],
       "requiere_acreditar": [],
@@ -520,7 +498,6 @@
       "formato": "Semestral",
       "requiere_cursada": [
         "14",
-        "y",
         "18"
       ],
       "requiere_acreditar": [],
@@ -544,22 +521,35 @@
       "formato": "Taller y Terreno",
       "requiere_cursada": [
         "1",
-        "a",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
         "20",
-        "26",
-        "y",
         "28"
       ],
       "requiere_acreditar": [
         "23",
         "24",
-        "y",
         "30"
       ],
       "prerequisitos": [
         "23",
         "24",
-        "y",
         "30"
       ]
     },
@@ -571,7 +561,24 @@
       "formato": "-",
       "requiere_cursada": [
         "1",
-        "a",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
         "20"
       ],
       "requiere_acreditar": [],
