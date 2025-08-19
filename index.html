@@ -2,82 +2,127 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Plan de Estudios – Visualizador y Planificador</title>
   <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
   <script src="https://unpkg.com/fuse.js@7.0.0"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Safe area for iOS notch */
+    :root { env(safe-area-inset-top); env(safe-area-inset-bottom); }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-  <header class="p-4 md:p-6 bg-white shadow-sm sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto">
-      <h1 class="text-2xl md:text-3xl font-bold">Plan de Estudios – Visualizador y Planificador</h1>
-      <p class="text-sm text-gray-600">Cargado desde <code>data_plan_estudios.json</code>. Buscá, filtrá por año, marcá materias aprobadas y descubrí cuáles podés cursar.</p>
+  <!-- Header -->
+  <header class="px-4 py-3 bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold leading-tight">Plan de Estudios</h1>
+        <p class="text-xs md:text-sm text-gray-600">Buscá materias, marcá aprobadas y visualizá correlativas.</p>
+      </div>
+      <button id="scrollToListBtn" class="inline-flex items-center justify-center text-sm md:text-base border px-3 md:px-4 py-2 rounded-xl hover:bg-gray-50 active:opacity-80 min-h-[44px]">
+        Materias
+      </button>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Panel de controles -->
-    <section class="lg:col-span-1">
-      <div class="bg-white rounded-2xl shadow p-4 md:p-5 space-y-4">
-        <div>
-          <label class="text-sm font-medium">Buscar materia</label>
-          <input id="searchInput" class="mt-1 w-full border rounded-lg px-3 py-2 outline-none focus:ring focus:ring-indigo-200" placeholder="Nombre o código..." />
+  <!-- Main -->
+  <main class="max-w-7xl mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+    <!-- Graph section first on mobile -->
+    <section class="lg:col-span-2 order-1">
+      <div class="bg-white rounded-2xl shadow overflow-hidden">
+        <div class="flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b">
+          <h2 class="font-semibold text-base md:text-lg">Mapa de correlatividades</h2>
+          <div class="hidden md:flex gap-2">
+            <button id="fitBtn" class="text-sm border px-3 py-2 rounded-xl hover:bg-gray-50 min-h-[44px]">Ajustar</button>
+            <button id="exportPngBtn" class="text-sm border px-3 py-2 rounded-xl hover:bg-gray-50 min-h-[44px]">PNG</button>
+          </div>
         </div>
-        <div>
-          <label class="text-sm font-medium">Filtrar por año</label>
-          <select id="yearFilter" class="mt-1 w-full border rounded-lg px-3 py-2 outline-none focus:ring focus:ring-indigo-200">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="hideLocked" type="checkbox" class="h-4 w-4">
-          <label for="hideLocked" class="text-sm">Ocultar materias bloqueadas (con previas sin aprobar)</label>
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="hideNoPrereq" type="checkbox" class="h-4 w-4">
-          <label for="hideNoPrereq" class="text-sm">Ocultar materias sin correlativas</label>
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="groupByYear" type="checkbox" class="h-4 w-4">
-          <label for="groupByYear" class="text-sm">Agrupar por año</label>
-        </div>
-        <div class="text-xs text-gray-500">Sugerencia: marcá materias como <em>aprobadas</em> para ver cuáles quedan <strong>habilitadas</strong>.</div>
+        <div id="cy" class="h-[68vh] sm:h-[70vh] lg:h-[72vh] min-h-[60vh]"></div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow p-4 md:p-5 mt-6">
-        <h2 class="font-semibold mb-2">Materias</h2>
-        <div id="courseList" class="space-y-2 max-h-[65vh] overflow-auto pr-1"></div>
+      <div class="bg-white rounded-2xl shadow p-4 md:p-5 mt-4 md:mt-6">
+        <h3 class="font-semibold mb-2">Leyenda</h3>
+        <ul class="text-sm text-gray-700 grid grid-cols-2 gap-x-6 gap-y-1">
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>Habilitada</li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>Disponible</li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>Bloqueada</li>
+          <li class="flex items-center"><span class="inline-block w-3 h-3 rounded-full bg-gray-300 mr-2"></span>Aprobada</li>
+        </ul>
       </div>
     </section>
 
-    <!-- Visualización -->
-    <section class="lg:col-span-2">
-      <div class="bg-white rounded-2xl shadow p-0 overflow-hidden">
-        <div class="flex items-center justify-between px-4 py-3 border-b">
-          <h2 class="font-semibold">Mapa de correlatividades</h2>
-          <div class="flex gap-2">
-            <button id="fitBtn" class="text-sm border px-3 py-1.5 rounded-lg hover:bg-gray-50">Ajustar vista</button>
-            <button id="exportPngBtn" class="text-sm border px-3 py-1.5 rounded-lg hover:bg-gray-50">Exportar PNG</button>
+    <!-- Controls + List -->
+    <section class="lg:col-span-1 order-2" id="listSection">
+      <!-- Controls in a collapsible details for mobile -->
+      <details class="bg-white rounded-2xl shadow open:md:open" open>
+        <summary class="cursor-pointer list-none px-4 py-3 md:px-5 md:py-4 border-b flex items-center justify-between">
+          <span class="font-semibold">Controles</span>
+          <span class="text-xs text-gray-500 md:hidden">tocar para abrir/cerrar</span>
+        </summary>
+        <div class="p-4 md:p-5 space-y-3 md:space-y-4">
+          <div>
+            <label class="text-sm font-medium">Buscar materia</label>
+            <input id="searchInput" class="mt-1 w-full border rounded-xl px-4 py-3 text-base outline-none focus:ring focus:ring-indigo-200" placeholder="Nombre o código..." inputmode="text" />
           </div>
-        </div>
-        <div id="cy" class="h-[70vh]"></div>
-      </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">Año</label>
+              <select id="yearFilter" class="mt-1 w-full border rounded-xl px-3 py-3 text-base outline-none focus:ring focus:ring-indigo-200">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button id="clearFilters" class="w-full border px-3 py-3 rounded-xl hover:bg-gray-50 text-sm md:text-base min-h-[44px]">Limpiar</button>
+            </div>
+          </div>
 
-      <div class="bg-white rounded-2xl shadow p-4 md:p-5 mt-6">
-        <h3 class="font-semibold mb-2">Leyenda</h3>
-        <ul class="text-sm text-gray-700 list-disc pl-5 space-y-1">
-          <li><span class="inline-block w-3 h-3 rounded-full bg-green-500 align-middle mr-2"></span>Habilitada: todas las correlativas aprobadas.</li>
-          <li><span class="inline-block w-3 h-3 rounded-full bg-yellow-500 align-middle mr-2"></span>Disponible: no tiene correlativas.</li>
-          <li><span class="inline-block w-3 h-3 rounded-full bg-red-500 align-middle mr-2"></span>Bloqueada: faltan aprobaciones.</li>
-          <li><span class="inline-block w-3 h-3 rounded-full bg-gray-300 align-middle mr-2"></span>Aprobada: ya marcada por vos.</li>
-        </ul>
+          <div class="flex items-center gap-3">
+            <input id="hideLocked" type="checkbox" class="h-5 w-5 rounded">
+            <label for="hideLocked" class="text-sm select-none">Ocultar bloqueadas</label>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="hideNoPrereq" type="checkbox" class="h-5 w-5 rounded">
+            <label for="hideNoPrereq" class="text-sm select-none">Ocultar sin correlativas</label>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="groupByYear" type="checkbox" class="h-5 w-5 rounded">
+            <label for="groupByYear" class="text-sm select-none">Agrupar por año</label>
+          </div>
+
+          <div class="flex gap-3 md:hidden pt-2">
+            <button id="fitBtnMobile" class="flex-1 border px-3 py-3 rounded-xl hover:bg-gray-50 min-h-[44px]">Ajustar</button>
+            <button id="exportPngBtnMobile" class="flex-1 border px-3 py-3 rounded-xl hover:bg-gray-50 min-h-[44px]">PNG</button>
+          </div>
+
+          <p class="text-xs text-gray-500">Tip: tocá nodos del grafo o el check de “aprobada” para recalcular habilitadas. Se guarda en este dispositivo.</p>
+        </div>
+      </details>
+
+      <!-- Course list -->
+      <div class="bg-white rounded-2xl shadow mt-4">
+        <div class="px-4 py-3 border-b flex items-center justify-between">
+          <h2 class="font-semibold">Materias</h2>
+          <button id="scrollToGraphBtn" class="text-xs border px-2 py-1.5 rounded-lg hover:bg-gray-50 md:hidden min-h-[36px]">Ir al grafo</button>
+        </div>
+        <div id="courseList" class="space-y-2 max-h-[48vh] md:max-h-[65vh] overflow-auto p-3 pr-1"></div>
       </div>
     </section>
   </main>
 
-  <footer class="max-w-7xl mx-auto p-6 text-xs text-gray-500">
-    App libre y estática. Podés alojarla en GitHub Pages o Netlify.
+  <!-- Sticky bottom action bar for very small screens -->
+  <div class="fixed bottom-0 inset-x-0 md:hidden z-30 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <div class="bg-white border rounded-2xl shadow-lg flex items-center justify-between p-2">
+      <button id="toTop" class="text-sm border px-3 py-2 rounded-xl min-h-[44px]">Arriba</button>
+      <div class="flex gap-2">
+        <button id="fitBtnDock" class="text-sm border px-3 py-2 rounded-xl min-h-[44px]">Ajustar</button>
+        <button id="exportPngBtnDock" class="text-sm border px-3 py-2 rounded-xl min-h-[44px]">PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-gray-500">
+    App libre y estática. Publicable en GitHub Pages/Netlify.
   </footer>
 
 <script>
@@ -95,7 +140,7 @@ function buildFuseIndex(cursos) {
   });
 }
 
-function computeStatus(curso, aprobadasSet, prereqIndex) {
+function computeStatus(curso, aprobadasSet) {
   const prereqs = curso.prerequisitos || [];
   if (aprobadasSet.has(curso.codigo)) return 'aprobada';
   if (!prereqs.length) return 'disponible';
@@ -115,10 +160,10 @@ function chipForStatus(status) {
 
 function colorForStatus(status) {
   const map = {
-    'aprobada': '#d1d5db',   // gray-300
-    'disponible': '#eab308',  // yellow-500
-    'habilitada': '#22c55e',  // green-500
-    'bloqueada': '#ef4444',   // red-500
+    'aprobada': '#d1d5db',
+    'disponible': '#eab308',
+    'habilitada': '#22c55e',
+    'bloqueada': '#ef4444',
   };
   return map[status] || '#9ca3af';
 }
@@ -126,20 +171,20 @@ function colorForStatus(status) {
 function makeCourseCard(curso, status, aprobadasSet) {
   const prereq = (curso.prerequisitos || []).length ? curso.prerequisitos.join(', ') : '—';
   return `
-  <div class="border rounded-xl p-3 hover:bg-gray-50">
+  <div class="border rounded-xl p-3 active:opacity-80">
     <div class="flex items-start justify-between gap-3">
       <div>
-        <div class="text-sm font-semibold">${curso.codigo} — ${curso.nombre}</div>
+        <div class="text-sm md:text-base font-semibold break-words">${curso.codigo} — ${curso.nombre}</div>
         <div class="text-xs text-gray-600">Año: ${curso.anio ?? '—'} | Correlativas: ${prereq}</div>
       </div>
-      <span class="text-xs px-2 py-1 rounded-full ${chipForStatus(status)}">${status}</span>
+      <span class="text-[11px] md:text-xs px-2 py-1 rounded-full ${chipForStatus(status)} whitespace-nowrap">${status}</span>
     </div>
-    <div class="flex items-center gap-2 mt-2">
+    <div class="flex items-center gap-3 mt-2">
       <label class="text-sm flex items-center gap-2 select-none">
-        <input type="checkbox" data-codigo="${curso.codigo}" class="aprobadoToggle h-4 w-4" ${aprobadasSet.has(curso.codigo) ? 'checked' : ''}>
-        Marcar como aprobada
+        <input type="checkbox" data-codigo="${curso.codigo}" class="aprobadoToggle h-5 w-5 rounded" ${aprobadasSet.has(curso.codigo) ? 'checked' : ''}>
+        Aprobada
       </label>
-      <button class="text-xs border px-2 py-1 rounded hover:bg-gray-50 focus:outline-none focus:ring" data-center="${curso.codigo}">Ver en gráfico</button>
+      <button class="text-xs border px-2 py-1.5 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring active:opacity-80 min-h-[36px]" data-center="${curso.codigo}">Ver en gráfico</button>
     </div>
   </div>`;
 }
@@ -168,7 +213,6 @@ function renderCourseList(cursos, aprobadasSet, fuse, ui) {
     return true;
   });
 
-  // Grouping
   let html = "";
   if (groupByYear) {
     const groups = {};
@@ -183,7 +227,7 @@ function renderCourseList(cursos, aprobadasSet, fuse, ui) {
       return Number(a) - Number(b);
     });
     for (const y of ys) {
-      html += `<div class="mt-3"><div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Año ${y}</div>`;
+      html += `<div class="mt-3"><div class="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Año ${y}</div>`;
       for (const {curso, status} of groups[y]) {
         html += makeCourseCard(curso, status, aprobadasSet);
       }
@@ -215,7 +259,6 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
           'text-valign': 'center',
           'font-size': 10,
           'background-color': ele => {
-            // status by prerequisites
             const code = ele.data('id');
             const curso = cursos.find(x => x.codigo === code);
             const status = computeStatus(curso, aprobadasSet);
@@ -266,6 +309,14 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
     courseList: document.getElementById('courseList'),
     fitBtn: document.getElementById('fitBtn'),
     exportPngBtn: document.getElementById('exportPngBtn'),
+    fitBtnMobile: document.getElementById('fitBtnMobile'),
+    exportPngBtnMobile: document.getElementById('exportPngBtnMobile'),
+    fitBtnDock: document.getElementById('fitBtnDock'),
+    exportPngBtnDock: document.getElementById('exportPngBtnDock'),
+    scrollToListBtn: document.getElementById('scrollToListBtn'),
+    scrollToGraphBtn: document.getElementById('scrollToGraphBtn'),
+    toTop: document.getElementById('toTop'),
+    listSection: document.getElementById('listSection'),
   };
 
   // Populate year filter
@@ -308,7 +359,7 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
   ui.hideNoPrereq.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
   ui.groupByYear.addEventListener('change', () => renderCourseList(cursos, aprobadasSet, fuse, ui));
 
-  // Delegate clicks in course list
+  // Delegate list interactions
   ui.courseList.addEventListener('change', (e) => {
     if (e.target.classList.contains('aprobadoToggle')) {
       const code = e.target.getAttribute('data-codigo');
@@ -326,18 +377,51 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
     if (node) {
       cy.elements().unselect();
       node.select();
-      cy.animate({ fit: { eles: node.closedNeighborhood(), padding: 60 }, duration: 400 });
+      cy.animate({ fit: { eles: node.closedNeighborhood(), padding: 60 }, duration: 350 });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
 
-  // Graph buttons
-  document.getElementById('fitBtn').addEventListener('click', () => cy.fit(null, 40));
-  document.getElementById('exportPngBtn').addEventListener('click', () => {
+  // Graph buttons (desktop)
+  if (ui.fitBtn) ui.fitBtn.addEventListener('click', () => cy.fit(null, 40));
+  if (ui.exportPngBtn) ui.exportPngBtn.addEventListener('click', () => {
     const png = cy.png({ full: true, scale: 2, bg: '#ffffff' });
     const a = document.createElement('a');
     a.href = png;
     a.download = 'mapa_correlatividades.png';
     a.click();
+  });
+
+  // Graph buttons (mobile duplicates)
+  const fitHandlers = [ui.fitBtnMobile, ui.fitBtnDock].filter(Boolean);
+  fitHandlers.forEach(btn => btn.addEventListener('click', () => cy.fit(null, 40)));
+  const pngHandlers = [ui.exportPngBtnMobile, ui.exportPngBtnDock].filter(Boolean);
+  pngHandlers.forEach(btn => btn.addEventListener('click', () => {
+    const png = cy.png({ full: true, scale: 2, bg: '#ffffff' });
+    const a = document.createElement('a');
+    a.href = png;
+    a.download = 'mapa_correlatividades.png';
+    a.click();
+  }));
+
+  // Navigation helpers
+  if (ui.scrollToListBtn) ui.scrollToListBtn.addEventListener('click', () => {
+    ui.listSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  if (ui.scrollToGraphBtn) ui.scrollToGraphBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  if (ui.toTop) ui.toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Clear filters
+  const clearBtn = document.getElementById('clearFilters');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    ui.searchInput.value = "";
+    ui.yearFilter.value = "";
+    ui.hideLocked.checked = false;
+    ui.hideNoPrereq.checked = false;
+    ui.groupByYear.checked = false;
+    renderCourseList(cursos, aprobadasSet, fuse, ui);
   });
 
   // Click node toggles approval
@@ -348,7 +432,7 @@ function buildGraph(cursos, relaciones, aprobadasSet) {
     refresh();
   });
 
-  // Rebuild layout on window resize (optional)
+  // Resize observer to keep graph healthy
   window.addEventListener('resize', () => cy.resize());
 })();
 </script>
